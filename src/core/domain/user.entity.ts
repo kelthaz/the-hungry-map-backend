@@ -1,11 +1,25 @@
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+
+@Entity()
 export class User {
-    constructor(
-        public id: number,
-        public name: string,
-        public email: string,
-        public password: string,
-        public createdAt: Date = new Date(),
-        public updatedAt: Date = new Date(),
-        public status: string
-    ) {}
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column({ unique: true })
+  email: string;
+
+  @Column()
+  password: string;
+
+  @Column({ default: 'active' })
+  status: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

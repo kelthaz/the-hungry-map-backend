@@ -1,26 +1,36 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from '../controllers/users/user.controller';
 import { UserService } from '../services/users/user.service';
 import { CreateUserUseCase } from 'src/core/use-cases/create-user.use-case';
 import { GetUsersUseCase } from 'src/core/use-cases/get-users.use-case';
-import { InMemoryUserRepository } from '../persistence/in-memory-user.repository';
 import { User } from 'src/core/domain/user.entity';
+import { UserRepository } from '../persistence/user.repository';
+import { DatabaseModule } from '../persistence/database.module';
 
 @Module({
-  imports: [],
+  imports: [
+    DatabaseModule,
+    TypeOrmModule.forFeature([User]),
+  ],
   controllers: [UserController],
-  providers: [UserService, InMemoryUserRepository,{
-    provide: CreateUserUseCase,
-    useFactory: (userRepository: InMemoryUserRepository) => {
-      return new CreateUserUseCase(userRepository);
+  providers: [
+    UserService,
+    UserRepository,
+    {
+      provide: CreateUserUseCase,
+      useFactory: (userRepository: UserRepository) => {
+        return new CreateUserUseCase(userRepository);
+      },
+      inject: [UserRepository],
     },
-    inject: [InMemoryUserRepository],
-  }, {
-    provide: GetUsersUseCase,
-    useFactory: (userRepository: InMemoryUserRepository) => {
-      return new GetUsersUseCase(userRepository);
+    {
+      provide: GetUsersUseCase,
+      useFactory: (userRepository: UserRepository) => {
+        return new GetUsersUseCase(userRepository);
+      },
+      inject: [UserRepository],
     },
-    inject: [InMemoryUserRepository],
-  }],
+  ],
 })
 export class AppModule {}
