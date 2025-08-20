@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from "@nestjs/common";
 import { UserService } from "../../services/users/user.service";
-import { CreateUserDto } from "src/application/dtos/create-user.dto";
+import { CreateUserDto } from "src/application/dtos/users/create-user.dto";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 
 
@@ -10,11 +10,12 @@ import { ApiTags, ApiOperation } from "@nestjs/swagger";
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @Post()
-    @ApiOperation({ summary: 'Create a new user' })
-    async createUser(@Body() createUserDto: CreateUserDto) {
-        return this.userService.createUser(createUserDto);
-    }
+@Post()
+async create(@Body() createUserDto: CreateUserDto) {
+  const user = await this.userService.createUser(createUserDto);
+  return { id: user.id }; // aquí ya controlas qué se expone
+}
+
 
     @Get()
     @ApiOperation({ summary: 'Get all users' })

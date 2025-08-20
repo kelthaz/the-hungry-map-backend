@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { User } from 'src/core/domain/user.entity';
+import { User } from 'src/core/domain/user/user.entity';
+import { Role } from 'src/core/domain/role/role.entity';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { User } from 'src/core/domain/user.entity';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
-        entities: [User],
+        entities: [User, Role],
         synchronize: true, // ⚠️ solo en desarrollo
         ssl: {
           rejectUnauthorized: false, // 👈 necesario para la mayoría de proveedores cloud

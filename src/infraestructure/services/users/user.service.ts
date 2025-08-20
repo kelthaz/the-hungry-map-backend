@@ -1,25 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserUseCase } from 'src/core/use-cases/create-user.use-case';
-import { GetUsersUseCase } from 'src/core/use-cases/get-users.use-case';
-import { User } from 'src/core/domain/user.entity';
-import { CreateUserDto } from 'src/application/dtos/create-user.dto';
+import { CreateUserUseCase } from 'src/core/use-cases/users/create-user.use-case';
+import { GetUsersUseCase } from 'src/core/use-cases/users/get-users.use-case';
+import { User } from 'src/core/domain/user/user.entity';
+import { CreateUserDto } from 'src/application/dtos/users/create-user.dto';
+import { Repository } from 'typeorm';
+import { Role } from 'src/core/domain/role/role.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly getUsersUseCase: GetUsersUseCase,
+
+    @InjectRepository(Role) // 👈 le dices a Nest que inyecte el repo de Role
+    private readonly roleRepository: Repository<Role>, // Assuming you have a RoleRepository injected
   ) {}
 
-async createUser(createUserDto: CreateUserDto): Promise<User> {
-  const user = new User();   // 👈 vacío
-  user.name = createUserDto.name;
-  user.email = createUserDto.email;
-  user.password = createUserDto.password;
-  user.status = createUserDto.status;
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const user = new User();
+    user.name = createUserDto.name; // <- aquí debería venir el valor
+    user.lastName = createUserDto.lastName;
+    user.email = createUserDto.email;
+    user.password = createUserDto.password;
+    user.status = createUserDto.status;
+    user.phone = createUserDto.phone;
 
-  return this.createUserUseCase.execute(user);
-}
+    const role = new Role();
+    role.id = Number(createUserDto.role);
+    user.role = role;
+
+    return this.createUserUseCase.execute(user);
+  }
 
   async getUsers(): Promise<User[]> {
     return this.getUsersUseCase.execute();
