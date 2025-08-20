@@ -1,21 +1,27 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from 'src/core/domain/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: 5432,
-      username: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASS || '123456',
-      database: process.env.DB_NAME || 'postgres',
-      entities: [User],
-      synchronize: true, // ⚠️ solo en desarrollo
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule], // aseguramos que se carguen las variables de entorno
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: 5432,
+        username: configService.get<string>('DB_USER'),
+        password: configService.get<string>('DB_PASS'),
+        database: configService.get<string>('DB_NAME'),
+        entities: [User],
+        synchronize: true, // ⚠️ solo en desarrollo
+        ssl: {
+          rejectUnauthorized: false, // 👈 necesario para la mayoría de proveedores cloud
+        },
+      }),
     }),
-    TypeOrmModule.forFeature([User]),
   ],
-  exports: [TypeOrmModule],
 })
 export class DatabaseModule {}

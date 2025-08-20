@@ -7,9 +7,13 @@ import { GetUsersUseCase } from 'src/core/use-cases/get-users.use-case';
 import { User } from 'src/core/domain/user.entity';
 import { UserRepository } from '../persistence/user.repository';
 import { DatabaseModule } from '../persistence/database.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     DatabaseModule,
     TypeOrmModule.forFeature([User]),
   ],
