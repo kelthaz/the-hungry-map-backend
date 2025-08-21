@@ -11,11 +11,21 @@ export class UserRepository implements UserRepositoryPort {
     private readonly ormRepo: Repository<User>,
   ) {}
 
-  async create(user: User): Promise<User> {
-    return await this.ormRepo.save(user);
-  }
+async create(user: User): Promise<User> {
+  const entity = this.ormRepo.create(user);
+  return await this.ormRepo.save(entity); // usa "entity"
+}
+
 
   async findAll(): Promise<User[]> {
     return await this.ormRepo.find();
+  }
+
+ async findByEmail(email: string): Promise<User | null> {
+    // Correcto: usa this.ormRepo y el método findOne
+    const user = await this.ormRepo.findOne({
+      where: { email: email },
+    });
+    return user; // findOne ya retorna null si no encuentra nada
   }
 }

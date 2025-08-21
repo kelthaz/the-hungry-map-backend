@@ -53,7 +53,7 @@ export class CreateUserDto {
   status: string;
 
   @ApiProperty({
-    example: 'Administrador',
+    example: 1,
     description: 'The role of the user',
   })
   @IsNumber()

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserUseCase } from 'src/core/use-cases/users/create-user.use-case';
 import { GetUsersUseCase } from 'src/core/use-cases/users/get-users.use-case';
+import { FindUserByEmailUseCase } from 'src/core/use-cases/users/find-by-email.use-case';
 import { User } from 'src/core/domain/user/user.entity';
 import { CreateUserDto } from 'src/application/dtos/users/create-user.dto';
 import { Repository } from 'typeorm';
@@ -12,6 +13,7 @@ export class UserService {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly getUsersUseCase: GetUsersUseCase,
+    private readonly findUserByEmailUseCase: FindUserByEmailUseCase,
 
     @InjectRepository(Role) // 👈 le dices a Nest que inyecte el repo de Role
     private readonly roleRepository: Repository<Role>, // Assuming you have a RoleRepository injected
@@ -35,5 +37,10 @@ export class UserService {
 
   async getUsers(): Promise<User[]> {
     return this.getUsersUseCase.execute();
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    // 👈 Se cambió el llamado al caso de uso inyectado
+    return this.findUserByEmailUseCase.execute(email);
   }
 }
