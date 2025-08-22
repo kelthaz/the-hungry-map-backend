@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateUserUseCase } from 'src/core/use-cases/users/create-user.use-case';
 import { GetUsersUseCase } from 'src/core/use-cases/users/get-users.use-case';
 import { FindUserByEmailUseCase } from 'src/core/use-cases/users/find-by-email.use-case';
@@ -20,19 +25,37 @@ export class UserService {
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const user = new User();
-    user.name = createUserDto.name; // <- aquí debería venir el valor
-    user.lastName = createUserDto.lastName;
-    user.email = createUserDto.email;
-    user.password = createUserDto.password;
-    user.status = createUserDto.status;
-    user.phone = createUserDto.phone;
+    try {
+      if (
+        !createUserDto.name ||
+        !createUserDto.email ||
+        !createUserDto.password
+      ) {
+        throw new BadRequestException('Faltan campos requeridos');
+      }
 
-    const role = new Role();
-    role.id = Number(createUserDto.role);
-    user.role = role;
+      const user = new User();
+      user.name = createUserDto.name;
+      user.lastName = createUserDto.lastName;
+      user.email = createUserDto.email;
+      user.password = createUserDto.password;
+      user.status = createUserDto.status;
+      user.phone = createUserDto.phone;
 
-    return this.createUserUseCase.execute(user);
+      const role = new Role();
+      role.id = Number(createUserDto.role);
+      user.role = role;
+
+      return await this.createUserUseCase.execute(user);
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException('El correo ya está en uso');
+      }
+
+      console.error('Error en createUser:', error);
+
+      throw new InternalServerErrorException('Error al crear el usuario');
+    }
   }
 
   async getUsers(): Promise<User[]> {
